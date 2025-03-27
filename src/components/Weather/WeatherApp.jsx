@@ -1,37 +1,76 @@
-import { useState, useEffect } from "react";
-import axios from "axios";
+import axios from 'axios';
+import React, { useEffect, useState } from 'react'
 
-const WeatherComponent = () => {
-  const [weather, setWeather] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+function WeatherApp() {
+    const [weather, setWeather] = useState(null);
+    const [city, setCity] = useState('')
+    const [loading, setLoading] = useState(false);
+    const API_URL = "https://api.openweathermap.org/data/2.5/weather";
+    const API_KEY = "7d88b436f0d35d241ab5217c2093a0e0";
 
-  useEffect(() => {
-    const fetchWeather = async () => {
-      try {
-        const response = await axios.get("https://freetestapi.com/api/v1/weathers");
-        // setWeather(response.data[0]);
-        console.log(response);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
+    const getWeatherInfo = async (city) => {
+        setLoading(true);
+            let {data} = await axios.get(`${API_URL}?q=${city}&appid=${API_KEY}&units=metric`)
+            console.log(data);
+            setWeather(data);
+            setLoading(false);
+    }
+
+    const getWeatherByLocation = async (lat, long) => {
+        setLoading(true);
+        try {
+            let { data } = await axios.get(`${API_URL}?lat=${lat}&lon=${long}&appid=${API_KEY}&units=metric`);
+            setWeather(data);
+        } catch (err) {
+            console.error(err);
+        } finally {
+            setLoading(false);
+        }
     };
 
-    fetchWeather();
-  }, []);
+    const handleGetCurrentLocation = () => {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition((position) => {
+                const { latitude, longitude } = position.coords;
+                getWeatherByLocation(latitude, longitude);
+            }, (error) => {
+                console.error("Error getting location: ", error);
+            });
+        } else {
+            alert("Geolocation is not supporting.");
+        }
+    };
 
-  if (loading) return <p>Loading...</p>;
-  if (error) return <p>Error: {error}</p>;
+    useEffect(() => {
+        if (city) {
+            getWeatherInfo(city);
+        }
+    }, [city]);
 
+
+    
   return (
     <div>
-      <h2>Weather Information</h2>
-      {/* <p>Temperature: {weather.temperature}°C</p>
-      <p>Condition: {weather.condition}</p> */}
+        <h1>Check Current weather of your City : </h1>
+        <div className='flex gap-3 justify-between my-2'>
+        <input type="text" onChange={ (event) => setCity(event.target.value)} className='border p-1 rounded' placeholder='Enter City name' />
+        <button onClick={handleGetCurrentLocation} className="bg-blue-500 text-white px-4 py-2 rounded">
+            Current <i className="ri-map-pin-line"></i>
+        </button>
+        </div>
+        {loading ? (
+            <div className="text-center">Loading...</div>
+        ) : (
+            weather && (
+                <div className='flex flex-col w-full bg-blue-100 rounded shadow-md p-2'>
+                    <h2>City Name :{weather.name}</h2>
+                    <p>City Temperature: {weather.main.temp} °C</p>
+                    <p>Weather: {weather.weather[0].description}</p>
+                </div>
+            )
+        )}
     </div>
-  );
-};
+  )
+}
 
-export default WeatherComponent;
+export default WeatherApp

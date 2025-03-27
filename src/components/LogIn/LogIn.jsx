@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom';
+import { admin } from '../../utils/LocalStorage';
 
 function LogIn({setLogin}) {
     const [email, setEmail] = useState("");
@@ -13,10 +14,13 @@ function LogIn({setLogin}) {
       if (!email || !password) {
         setError("Email and Password are required");
         return;
-      }
+      }else if(email===admin.email && password===admin.password){
       setLogin(true)
       navigate('/todo')
       setError("");
+      }else{
+        alert('Wrong password or email')
+      }
     };
   
     return (
