@@ -28,7 +28,7 @@ A simple Todo application built with React and Redux Toolkit. This application a
 
    ```bash
    git clone https://github.com/112AG/QuadB.git
-   cd todo-app
+   cd QuadB
    ```
 
 2. Install the dependencies:
